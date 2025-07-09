@@ -13,12 +13,11 @@ export default function Page() {
   useEffect(() => {
     const width = mountRef.current.clientWidth;
     const height = mountRef.current.clientHeight;
-    let model = null;
     const envtexture = 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/4k/rogland_clear_night_4k.hdr';
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    camera.position.set(0, 20, 75);
+    camera.position.set(0, 15, 45);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(width, height);
@@ -30,17 +29,19 @@ export default function Page() {
     controls.minDistance = 15;
     controls.maxDistance = camera.position.length() * 1.25;
     controls.maxPolarAngle = Math.PI / 2.5;
+    // controls.enablePan = false;
     controls.screenSpacePanning = false;
     controls.enableDamping = true;
-    controls.dampingFactor = 0.09;
+    controls.dampingFactor = 0.05;
+
     controls.update();
 
     const hdrLoader = new RGBELoader();
     hdrLoader.load(envtexture, (envMap) => {
       envMap.mapping = THREE.EquirectangularReflectionMapping;
 
-      const skybox = new GroundedSkybox(envMap, 10, 100);
-      skybox.position.y = 10;
+      const skybox = new GroundedSkybox(envMap, 15, 100);
+      skybox.position.y = 15;
       scene.add(skybox);
 
     //   const light = new THREE.DirectionalLight(0xffffff, 1);
@@ -55,29 +56,16 @@ scene.add(hemiLight);
 
       const loader = new GLTFLoader();
       loader.load('https://modelviewer.dev/shared-assets/models/Astronaut.glb', (gltf) => {
-      model = gltf.scene;
-      model.scale.set(6, 6, 6);
-      model.position.set(0, 0, 0);
-      scene.add(model);
-
-  // Set initial target once the model is loaded
-      controls.target.copy(model.position);
-  controls.update();
-});
+        const model = gltf.scene;
+        model.scale.set(5, 5, 5);
+        model.position.set(0, 0, 0);
+        scene.add(model);
+      });
 
       const animate = () => {
-  requestAnimationFrame(animate);
-
-  // Keep looking at model if it's loaded
-  if (model) {
-    controls.target.copy(model.position);
-  }
-
-  controls.update();
-  renderer.render(scene, camera);
-};
-
-
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      };
 
       animate();
     });
@@ -91,4 +79,4 @@ scene.add(hemiLight);
   }, []);
 
   return <div ref={mountRef} style={{ width: '100vw', height: '100vh' }} />;
-}                                                                 
+}                                                   
